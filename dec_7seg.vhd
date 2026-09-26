@@ -1,26 +1,30 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
+-- Decodificador bcd a 7 seg
 entity dec_7seg is
-    Port (
-        bcd     : in  STD_LOGIC_VECTOR(3 downto 0); -- Entrada en código BCD
-        seg_out : out STD_LOGIC_VECTOR(6 downto 0)  -- Salida
+    port (
+        bcd : in  std_logic_vector(3 downto 0);
+        seg_out  : out std_logic_vector(6 downto 0)  
     );
 end dec_7seg;
 
 architecture dec_7seg_arch of dec_7seg is
 begin
-    -- Asignación con with-select y mapeo
-    with bcd select
-        seg_out <= "1111110" when "0000", -- 0
-                   "0110000" when "0001", -- 1
-                   "1101101" when "0010", -- 2
-                   "1111001" when "0011", -- 3
-                   "0110011" when "0100", -- 4
-                   "1011011" when "0101", -- 5
-                   "1011111" when "0110", -- 6
-                   "1110000" when "0111", -- 7
-                   "1111111" when "1000", -- 8
-                   "1111011" when "1001", -- 9
-                   "0000000" when others; -- apaga en otros casos
-end architecture;
+    process(bcd)
+    begin
+        case bcd is
+            when "0000" => seg_out <= "1000000"; -- 0
+            when "0001" => seg_out <= "1111001"; -- 1
+            when "0010" => seg_out <= "0100100"; -- 2
+            when "0011" => seg_out <= "0110000"; -- 3
+            when "0100" => seg_out <= "0011001"; -- 4
+            when "0101" => seg_out <= "0010010"; -- 5
+            when "0110" => seg_out <= "0000010"; -- 6
+            when "0111" => seg_out <= "1111000"; -- 7
+            when "1000" => seg_out <= "0000000"; -- 8
+            when "1001" => seg_out <= "0010000"; -- 9
+            when others => seg_out <= "1111111"; -- apagado
+        end case;
+    end process;
+end;

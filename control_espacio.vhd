@@ -25,28 +25,21 @@ architecture control_espacio_arch of control_espacio is
     signal dec : integer range 0 to 9 := 0;
     signal uni : integer range 0 to 9 := 0;
 
-    -- Banderas lógicas que reemplazan la máquina de estados
     signal alarma_activa       : std_logic := '0';
     signal felicitacion_activa : std_logic := '0';
     signal persona_prev        : std_logic := '0';
 
-    -- Decodificador BCD a 7 Segmentos usando CASE
-    function digito_7seg(digito : integer) return STD_LOGIC_VECTOR is
-    begin
-        case digito is
-            when 0 => return "1000000"; -- 0
-            when 1 => return "1111001"; -- 1
-            when 2 => return "0100100"; -- 2
-            when 3 => return "0110000"; -- 3
-            when 4 => return "0011001"; -- 4
-            when 5 => return "0010010"; -- 5
-            when 6 => return "0000010"; -- 6
-            when 7 => return "1111000"; -- 7
-            when 8 => return "0000000"; -- 8
-            when 9 => return "0010000"; -- 9
-            when others => return "1111111"; -- Apagado
-        end case;
-    end function;
+    -- Declaración del componente dec_7seg
+    component dec_7seg is
+        Port (
+            bcd     : in  STD_LOGIC_VECTOR(3 downto 0);
+            seg_out : out STD_LOGIC_VECTOR(6 downto 0)
+        );
+    end component;
+
+    -- Señales auxiliares para conectar los integers decenas/unidades al puerto BCD del componente
+    signal bcd_dec : std_logic_vector(3 downto 0);
+    signal bcd_uni : std_logic_vector(3 downto 0);
 
 begin
 
@@ -67,7 +60,7 @@ begin
         end if;
     end process;
 
-    -- Lógica principal usando condicionales (If-Else) y detección de flancos
+    -- Lógica principal usando condicionales If-Else y detección de flancos
     process(clk, rst)
     begin
         if rst = '0' then
@@ -81,13 +74,13 @@ begin
             -- Guardamos el valor actual para detectar cambios (flancos) en el siguiente ciclo
             persona_prev <= ocupado;
 
-            -- 1. Flanco de subida: El espacio acaba de ser OCUPADO (0 -> 1)
+            -- Flanco de subida: El espacio acaba de ser OCUPADO (0 -> 1)
             if ocupado = '1' and persona_prev = '0' then
                 contador_35 <= 0;
                 alarma_activa <= '0';
                 felicitacion_activa <= '0';
             
-            -- 2. Flanco de bajada: El espacio acaba de ser DESOCUPADO (1 -> 0)
+            -- Flanco de bajada: El espacio acaba de ser DESOCUPADO (1 -> 0)
             elsif ocupado = '0' and persona_prev = '1' then
                 contador_35 <= 0; 
                 if alarma_activa = '0' then
@@ -117,7 +110,6 @@ begin
                     end if;
                 end if;
             end if;
-
         end if;
     end process;
 
@@ -129,7 +121,22 @@ begin
     dec <= contador_35 / 10;
     uni <= contador_35 rem 10;
 
-    display_35_decenas  <= digito_7seg(dec);
-    display_35_unidades <= digito_7seg(uni);
+    -- Conversión de integer a std_logic_vector(3 downto 0)
+    bcd_dec <= std_logic_vector(to_unsigned(dec, 4));
+    bcd_uni <= std_logic_vector(to_unsigned(uni, 4));
+
+    -- Instanciación del componente para las decenas
+    inst_decenas: dec_7seg
+        port map (
+            bcd     => bcd_dec,
+            seg_out => display_35_decenas
+        );
+
+    -- Instanciación del componente para las unidades
+    inst_unidades: dec_7seg
+        port map (
+            bcd     => bcd_uni,
+            seg_out => display_35_unidades
+        );
 
 end control_espacio_arch;
