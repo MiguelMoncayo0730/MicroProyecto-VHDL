@@ -69,7 +69,7 @@ begin
             
         elsif rising_edge(clk) then
             
-            -- Start / Stop con lógica de botones en bajo ('0')
+            -- Start y Stop con lógica de botones en bajo '0'
             if start = '0' then
                 running <= '1';
             elsif stop = '0' then
