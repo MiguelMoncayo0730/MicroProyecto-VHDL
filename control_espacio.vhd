@@ -60,38 +60,38 @@ begin
         end if;
     end process;
 
-    -- Lógica principal usando condicionales If-Else y detección de flancos
+    -- Lógica principal usando condicionales If-Else y detección de cambios
     process(clk, rst)
     begin
         if rst = '0' then
             contador_35 <= 0;
             alarma_activa <= '0';
             felicitacion_activa <= '0';
-            persona_prev <= '0';
+            persona_anterior <= '0';
 
         elsif rising_edge(clk) then
             
-            -- Guardamos el valor actual para detectar cambios (flancos) en el siguiente ciclo
-            persona_prev <= ocupado;
+            -- Se guarda el valor actual para detectar cambios en el siguiente ciclo
+            persona_anterior <= ocupado;
 
-            -- Flanco de subida: El espacio acaba de ser OCUPADO (0 -> 1)
-            if ocupado = '1' and persona_prev = '0' then
+            -- Flanco de subida, es decir que el espacio acaba de ser ocupado (0 -> 1)
+            if ocupado = '1' and persona_anterior = '0' then
                 contador_35 <= 0;
                 alarma_activa <= '0';
                 felicitacion_activa <= '0';
             
-            -- Flanco de bajada: El espacio acaba de ser DESOCUPADO (1 -> 0)
-            elsif ocupado = '0' and persona_prev = '1' then
+            -- Flanco de bajada, es decir que el espacio acaba de ser desocupado (1 -> 0)
+            elsif ocupado = '0' and persona_anterior = '1' then
                 contador_35 <= 0; 
                 if alarma_activa = '0' then
-                    -- Si se desocupó antes de que sonara la alarma, lo felicitamos
+                    -- Si la persona desocupó antes de que sonara la alarma se le felicita
                     felicitacion_activa <= '1';
                 else
-                    -- Si ya estaba la alarma, simplemente la apagamos al salir
+                    -- Si ya estaba la alarma simplemente se apaga al salir
                     alarma_activa <= '0';
                 end if;
 
-            -- 3. Nivel alto continuo: El espacio sigue OCUPADO (1 y 1)
+            -- Si el espacio sigue ocupado (1 y 1)
             elsif ocupado = '1' then
                 if pulso_1hz = '1' then
                     if alarma_activa = '0' then
@@ -125,14 +125,14 @@ begin
     bcd_dec <= std_logic_vector(to_unsigned(dec, 4));
     bcd_uni <= std_logic_vector(to_unsigned(uni, 4));
 
-    -- Instanciación del componente para las decenas
+    -- Llamada del componente para las decenas
     inst_decenas: dec_7seg
         port map (
             bcd     => bcd_dec,
             seg_out => display_35_decenas
         );
 
-    -- Instanciación del componente para las unidades
+    -- Llamada del componente para las unidades
     inst_unidades: dec_7seg
         port map (
             bcd     => bcd_uni,
