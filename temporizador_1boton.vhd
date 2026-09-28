@@ -84,11 +84,11 @@ begin
                 if btn_prev = '0' then
                     -- Si se soltó antes de llegar a los 2 segundos
                     if contador_btn < 99_999_998 then
-                        alternar_run <= '1'; -- Generamos un pulso para alternar
+                        alternar_run <= '1'; -- Se genera un pulso para alternar
                     end if;
                 end if;
                 
-                contador_btn <= 0; -- Reiniciamos el medidor del botón
+                contador_btn <= 0; -- Se reinicia el medidor del botón
             end if;
         end if;
     end process;
@@ -104,11 +104,11 @@ begin
                 min_u   <= 0;
                 running <= '0';
             
-            -- Prioridad 2: Alternar Start/Stop por toque corto
+            -- Alternar Start/Stop por toque corto
             elsif alternar_run = '1' then
                 running <= not running;
             
-            -- Prioridad 3: Avanzar el reloj
+            -- Avanza el reloj
             elsif pulso_1hz = '1' and running = '1' then
                 if sec_u < 9 then
                     sec_u <= sec_u + 1;
@@ -134,7 +134,7 @@ begin
     bcd_sec_d <= std_logic_vector(to_unsigned(sec_d, 4));
     bcd_min_u <= std_logic_vector(to_unsigned(min_u, 4));
 
-    -- Instanciación de los Displays
+    -- Llamada de los Displays
     display_unidades : dec_7seg port map (bcd => bcd_sec_u, seg_out => seg_uni);
     display_decenas  : dec_7seg port map (bcd => bcd_sec_d, seg_out => seg_dec);
     display_minutos  : dec_7seg port map (bcd => bcd_min_u, seg_out => min);

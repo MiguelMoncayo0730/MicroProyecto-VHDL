@@ -9,6 +9,7 @@ entity temporizador_3botones is
         stop    : in  STD_LOGIC;
         reset   : in  STD_LOGIC;
         min     : out STD_LOGIC_VECTOR(6 downto 0);
+		  dp_min  : out STD_LOGIC;
         seg_dec : out STD_LOGIC_VECTOR(6 downto 0);
         seg_uni : out STD_LOGIC_VECTOR(6 downto 0)
     );
@@ -36,6 +37,8 @@ architecture temporizador_3botones_arch of temporizador_3botones is
     signal bcd_min_u : STD_LOGIC_VECTOR(3 downto 0);
 
 begin
+    -- Enciende el punto decimal del display de minutos
+    dp_min <= '0'; 
 
     -- Divisor de 50 MHz a 1 Hz
     process(clk, reset)
